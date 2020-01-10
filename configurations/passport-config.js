@@ -22,7 +22,7 @@ function initialize(passport, getUserByEmail, getUserById) {
 
   passport.use(new localStrategy({ usernameField: 'email' }, authenticateUser)) //we didn't add password because by default it requires password and we already set our input name to that
   passport.serializeUser((user, done) => done(null, user.id)) //serialize and store user in a session
-  passport.deserializeUser((id, done) => { //se serialize our user to a single id
+  passport.deserializeUser((id, done) => { //de serialize our user to a single id
     return done(null, getUserById(id))
   })
 }
