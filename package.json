@@ -1,0 +1,27 @@
+{
+  "name": "shops_in_region",
+  "version": "1.0.0",
+  "description": "Displays shops in a specific region with respect to distance from the user. @2020",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index",
+    "dev": "nodemon index"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BaxterSimwanza/ShopsInRegion.git"
+  },
+  "author": "Baxter K. Simwanza",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BaxterSimwanza/ShopsInRegion/issues"
+  },
+  "homepage": "https://github.com/BaxterSimwanza/ShopsInRegion#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.2"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "express-handlebars": "^3.1.0"
+  }
+}
