@@ -1,3 +1,7 @@
-#SHOPS IN REGION by BAXTER K. SIMWANZA started 9th/01/2020
+#SHOPS IN REGION by BAXTER K. SIMWANZA
 
-expected date of completion 12th/01/2020
+Node JS project using online MongoDB Atlas as database.
+'npm run dev' executes the code with nodemone
+
+
+Project still in progress...
