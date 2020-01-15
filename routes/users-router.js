@@ -2,31 +2,36 @@ const express = require('express')
 const router = express.Router()
 const bcryptjs = require('bcryptjs')
 const mongoose = require('mongoose')
-
 const Users = require('../models/users-model')
+var userData = require('../models/user-data')
+
+router.get('/', (req, res) => {
+    res.redirect('/login')
+    next()
+});
 
 router.get('/login', (req, res) => {
     res.render('login')
 });
 
-const usersx = require('../models/user-data')
-
 router.post('/login', (req, res, next) => {
     Users.find({ email: req.body.email })
         .exec()
-        .then(user => {
+        .then(async user => {
             try {
-                if (user.length >= 1) {
-                    usersx.push(user)
-                    console.log('User from Atlas: ' + usersx)
+                if (user.length >= 1) {                             //If a user with this email exists, return his info and save it in memory
+                    userData = user
+                    if (await bcryptjs.compare(req.body.password, userData[0].password)){   //If the hashed input password matches the database
+                        res.redirect('/nearbyShops')
+                        next()
+                    }else{                                          //Password mismatch
+                        res.redirect('/login')
+                        next()
+                    }
+                }else{                                              //No user with that email in database
+                    res.redirect('/login')
+                    next()
                 }
-            } catch (error) {
-                next(error)
-            }
-        }).then(() => {
-            try {
-                res.redirect('/shops')
-                next()
             } catch (error) {
                 next(error)
             }
@@ -43,11 +48,11 @@ router.post('/createAccount', (req, res) => {
             .exec()
             .then(async user => {
                 try {
-                    if (user.length >= 1) {
+                    if (user.length >= 1) {                         //If this email already exists in the database
                         return res.status(409).json({
                             message: "User with that email already exists!"
                         })
-                    } else {
+                    } else {                                        //Create hash the password and create a new user
                         const hashedPassword = await bcryptjs.hash(req.body.password, 10)
                         const newUser = new Users({
                             _id: new mongoose.Types.ObjectId(),
@@ -56,12 +61,13 @@ router.post('/createAccount', (req, res) => {
                         });
                         newUser
                             .save()
-                            .then(result => {
-                                console.log('Account Created ' + result)
-
-                            })
-                            .catch(err => console.log(err))
-                        res.redirect('/login')
+                            .then(()=>{
+                                try {
+                                    res.redirect('/login')          //If new user is created successfully, redirect to the login page
+                                } catch (error) {
+                                    next(error)
+                                }
+                            })   
                     }
                 } catch (err) {
                     next(err)
@@ -72,8 +78,8 @@ router.post('/createAccount', (req, res) => {
     }
 })
 
-router.delete('/logout', (req, res) => {
-    res.redirect('/login')        //methode overide was implemented
+router.delete('/logout', (req, res) => {                            //Logout from application
+    res.redirect('/login')
 })
 
 module.exports = router

@@ -1,3 +1,3 @@
-const usersx = [];
+var userData = [];
 
-module.exports = usersx;
+module.exports = userData;
