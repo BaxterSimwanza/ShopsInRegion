@@ -5,16 +5,22 @@
 <a href="/nearbyShops">Nearby Shops</a>
 <a href="/preferredShops">My Preferred Shops</a>
 
-<div class="card">
-    <div class="title">
-        <h1>Shop name</h1>
-    </div>
-    <div class="image">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Gfp-missouri-st-louis-clubhouse-pond-and-scenery.jpg/1199px-Gfp-missouri-st-louis-clubhouse-pond-and-scenery.jpg">
-    </div>
+{{#each shopsData}}
 
-    <div class="des">
-        <button>Dislike</button>
-        <button>Like</button>
-    </div>
+<div class="card">
+    <form method="POST">
+        <div class="title" >
+            <input type="hidden" name="title" value={{ title }}>
+            <h1>{{ title }}</h1>
+        </div>
+        <div class="image">
+            <img src={{ imageLink }}>
+        </div>
+        <div class="des">
+            <button type="submit" formaction="/disLikeShop">DisLike</button>
+            <button type="submit" formaction="/likeShop">Like</button>
+        </div>
+    </form>
 </div>
+
+{{/each}}

@@ -5,15 +5,16 @@
 <a href="/nearbyShops">Nearby Shops</a>
 <a href="/preferredShops">My Preferred Shops</a>
 
+{{#each shopsData}}
 <div class="card">
     <div class="title">
-        <h1>Shop name</h1>
+        <h1>{{ title }}</h1>
     </div>
     <div class="image">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Gfp-missouri-st-louis-clubhouse-pond-and-scenery.jpg/1199px-Gfp-missouri-st-louis-clubhouse-pond-and-scenery.jpg">
+        <img src={{ imageLink }}>
     </div>
-
     <div class="des">
         <button>Remove</button>
     </div>
 </div>
+{{/each}}

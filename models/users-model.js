@@ -5,10 +5,10 @@ const userSchema = mongoose.Schema({
     email: {type: String, required:true},
     password: {type: String, required:true},
     likedShopsId:[{
-        type: mongoose.Schema.Types.ObjectId
+        type: String
     }],
     dislikedShopsId:[{
-        type: mongoose.Schema.Types.ObjectId
+        type: String
     }]
 });
 

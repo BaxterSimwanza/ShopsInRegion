@@ -1,3 +1,3 @@
-var userData = [];
+var userData = []
 
 module.exports = userData;

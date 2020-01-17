@@ -2,10 +2,11 @@ const express = require('express')
 const router = express.Router()
 const bcryptjs = require('bcryptjs')
 const mongoose = require('mongoose')
+
 const Users = require('../models/users-model')
 var userData = require('../models/user-data')
 
-router.get('/', (req, res) => {
+router.get('/', (req, res, next) => {
     res.redirect('/login')
     next()
 });
@@ -15,27 +16,33 @@ router.get('/login', (req, res) => {
 });
 
 router.post('/login', (req, res, next) => {
-    Users.find({ email: req.body.email })
-        .exec()
-        .then(async user => {
-            try {
-                if (user.length >= 1) {                             //If a user with this email exists, return his info and save it in memory
-                    userData = user
-                    if (await bcryptjs.compare(req.body.password, userData[0].password)){   //If the hashed input password matches the database
-                        res.redirect('/nearbyShops')
-                        next()
-                    }else{                                          //Password mismatch
+    try {
+        Users.find({ email: req.body.email })
+            .exec()
+            .then(async user => {
+                try {
+                    if (user.length >= 1) {                               //If a user with this email exists, return his info and save it in memory
+
+                        userData.push(user[0])
+
+                        if (await bcryptjs.compare(req.body.password, userData[0].password)) {   //If the hashed input password matches the database
+                            res.redirect('/nearbyFilteredShops')
+                            next()
+                        } else {                                          //Password mismatch
+                            res.redirect('/login')
+                            next()
+                        }
+                    } else {                                              //No user with that email in database
                         res.redirect('/login')
                         next()
                     }
-                }else{                                              //No user with that email in database
-                    res.redirect('/login')
-                    next()
+                } catch (error) {
+                    next(error)
                 }
-            } catch (error) {
-                next(error)
-            }
-        });
+            });
+    } catch (error) {
+        next(error)
+    }
 });
 
 router.get('/createAccount', (req, res) => {
@@ -61,13 +68,13 @@ router.post('/createAccount', (req, res) => {
                         });
                         newUser
                             .save()
-                            .then(()=>{
+                            .then(() => {
                                 try {
                                     res.redirect('/login')          //If new user is created successfully, redirect to the login page
                                 } catch (error) {
                                     next(error)
                                 }
-                            })   
+                            })
                     }
                 } catch (err) {
                     next(err)
