@@ -1,0 +1,22 @@
+.loginForm{
+    min-width: 100vw;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+}
+
+.loginForm form{
+    width: 30vw;
+    padding: 20px;
+    border: 1px solid gainsboro;
+    border-radius: 4px;
+}
+
+.loginButtons{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}

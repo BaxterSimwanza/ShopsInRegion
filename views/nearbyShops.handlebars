@@ -1,26 +1,37 @@
-<form action="/logout?_method=DELETE" method="POST">
-    <button type="submit">Log Out</button>
-</form>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
 
-<a href="/nearbyShops">Nearby Shops</a>
-<a href="/preferredShops">My Preferred Shops</a>
+    <div class="collapse navbar-collapse" id="navbarText">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="/nearbyFilteredShops">Nearby Shops</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/preferredShops">My Preferred Shops</a>
+            </li>
+        </ul>
 
+        <span class="navbar-text">
+            <form action="/logout?_method=DELETE" method="POST">
+                <button type="submit" class="btn btn-outline-danger">Log Out</button>
+            </form>
+        </span>
+    </div>
+</nav>
+
+
+<div class="cardsContainer">
 {{#each shopsData}}
 
-<div class="card">
+<div class="card" style="width: 22rem;">
     <form method="POST">
-        <div class="title" >
-            <input type="hidden" name="title" value={{ title }}>
-            <h1>{{ title }}</h1>
-        </div>
-        <div class="image">
-            <img src={{ imageLink }}>
-        </div>
-        <div class="des">
-            <button type="submit" formaction="/disLikeShop">DisLike</button>
-            <button type="submit" formaction="/likeShop">Like</button>
+        <input type="hidden" name="title" value={{ title }}>
+        <h5 class="card-title" style="text-align: center; vertical-align:middle;">{{title}}</h5>
+        <img src={{ imageLink }} class="card-img-top" alt="shop image">
+        <div class="card-body" style="text-align: center;">
+            <button type="submit" class="btn btn-danger" formaction="/disLikeShop">DisLike</button>
+            <button type="submit" class="btn btn-success" formaction="/likeShop">Like</button>
         </div>
     </form>
 </div>
-
 {{/each}}
+</div>
