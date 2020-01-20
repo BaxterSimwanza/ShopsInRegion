@@ -1,17 +1,18 @@
-<h1>Create New Account</h1>
-<form action="/createAccount" method="POST">
-
-  <div>
-    <label for="email">Email</label>
-    <input type="email" id="email" name="email" required>
-  </div>
-
-  <div>
-    <label for="password">Password</label>
-    <input type="password" id="password" name="password" required>
-  </div>
-
-  <button type="submit">Create Account</button>
-  
-</form>
-<a href="/login">Login Page</a>
+<div class="loginForm">
+  <form action="/createAccount" method="POST">
+    <h1>Create Account</h1>
+    <div class="form-group">
+      <label for="email">Email address</label>
+      <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp" required>
+      <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+    </div>
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" class="form-control" id="password" name="password" required>
+    </div>
+    <div class="loginButtons">
+      <button type="submit" class="btn btn-primary">Create Account</button>
+      <a href="/login">Back to login...</a>
+    </div>
+  </form>
+</div>

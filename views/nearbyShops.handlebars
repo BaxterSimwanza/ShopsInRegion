@@ -3,7 +3,7 @@
     <div class="collapse navbar-collapse" id="navbarText">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item">
-                <a class="nav-link" href="/nearbyFilteredShops">Nearby Shops</a>
+                <a class="nav-link" href="/filterNearbyShops">Nearby Shops</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="/preferredShops">My Preferred Shops</a>
@@ -18,20 +18,18 @@
     </div>
 </nav>
 
-
 <div class="cardsContainer">
-{{#each shopsData}}
-
-<div class="card" style="width: 22rem;">
-    <form method="POST">
-        <input type="hidden" name="title" value={{ title }}>
-        <h5 class="card-title" style="text-align: center; vertical-align:middle;">{{title}}</h5>
-        <img src={{ imageLink }} class="card-img-top" alt="shop image">
-        <div class="card-body" style="text-align: center;">
-            <button type="submit" class="btn btn-danger" formaction="/disLikeShop">DisLike</button>
-            <button type="submit" class="btn btn-success" formaction="/likeShop">Like</button>
-        </div>
-    </form>
-</div>
-{{/each}}
+    {{#each shopsData}}
+    <div class="card" style="width: 22rem;">
+        <form method="POST">
+            <input type="hidden" name="shopId" value={{ shopId }}>
+            <h5 class="card-title" style="text-align: center; vertical-align:middle;">{{shopName}}</h5>
+            <img src={{ imageLink }} class="card-img-top" alt="shop image">
+            <div class="card-body" style="text-align: center;">
+                <button type="submit" class="btn btn-danger" formaction="/disLikeShop">Dislike</button>
+                <button type="submit" class="btn btn-success" formaction="/likeShop">Like</button>
+            </div>
+        </form>
+    </div>
+    {{/each}}
 </div>

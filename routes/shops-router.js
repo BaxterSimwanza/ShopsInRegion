@@ -1,164 +1,89 @@
 const express = require('express');
 const router = express.Router();
-const fetch = require('node-fetch');
+var locationFunctions = require("./location")
 
-var Shops = require('../models/shops-model')
-const Users = require('../models/users-model')
-var userData = require('../models/user-data')
-var shopsData = require('../models/shops-data')
+var Shops = require('../models/mongooseSchema/shops-model')
+const Users = require('../models/mongooseSchema/users-model')
+
+var userData = require('../data/user-data')
+var shopsData = []
 var likedShopsData = []
 var dislikedShopsArray = []
 
-var myPosition = {
-    longitude: 0,
-    latitude: 0
-}
-
-function calculateDistance(lat1, lon1, lat2, lon2) {
-    if ((lat1 == lat2) && (lon1 == lon2)) {
-        return 0;
-    } else {
-        var radlat1 = Math.PI * lat1 / 180;
-        var radlat2 = Math.PI * lat2 / 180;
-        var theta = lon1 - lon2;
-        var radtheta = Math.PI * theta / 180;
-        var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
-        if (dist > 1) {
-            dist = 1;
-        }
-        dist = Math.acos(dist);
-        dist = dist * 180 / Math.PI;
-        dist = dist * 60 * 1.1515;
-        dist = dist * 1.609344
-        return dist;
-    }
-}
-
-function sortShops(shop1, shop2) {
-    let distanceToShop1 = calculateDistance(
-        shop1.latitude, shop1.longitude, myPosition.latitude, myPosition.longitude
-    )
-    let distanceToShop2 = calculateDistance(
-        shop2.latitude, shop2.longitude, myPosition.latitude, myPosition.longitude
-    )
-    if (distanceToShop1 < distanceToShop2) {
-        return -1;
-    }
-    if (distanceToShop1 > distanceToShop2) {
-        return 1;
-    }
-    return 0;
-}
-
-function getMyCurrentLocation() {
-    fetch('https://ipapi.co/json/')
-        .then(function (response) {
-            try {
-                return response.json();
-            } catch (error) {
-                console.log(error)
-            }
-        })
-        .then(function (data) {
-            try {
-                myPosition.longitude = data.longitude
-                myPosition.latitude = data.latitude
-            } catch (error) {
-                console.log(error)
-            }
-        });
-}
-
-
-
-router.get('/nearbyFilteredShops', (req, res, next) => {
-    shopsData = []
+//FILTERS NEARBY SHOPS THAT ARE NEITHER LIKED NOR DISLIKED BY THE CURRENT USE
+router.get('/filterNearbyShops', (req, res, next) => {
     try {
-        Shops.find({                                                   //Find all except liked and disliked shops
+        shopsData = []
+        Shops.find({
             $or:
                 [
-                    { title: { $nin: userData[0].likedShopsId.concat(userData[0].dislikedShopsId) } }
+                    { shopId: { $nin: userData[0].likedShopsId.concat(userData[0].dislikedShopsId) } }
                 ]
         }).exec()
             .then(allShops => {
-                try {
-                    if (allShops.length >= 1) {                        //If we have shops in the region
-                        // getMyCurrentLocation()
-                        allShops.forEach(shop => {
-                            let { title, imageLink, longitude, latitude } = shop;
-                            shopsData.push({ title: title, imageLink: imageLink, longitude: longitude, latitude: latitude });
-                        })
-                    } else {
-                        console.log("No shops to display!")
-                    }
-                } catch (err) {
-                    next(err)
+                if (allShops.length >= 1) {
+                    allShops.forEach(shop => {
+                        let { shopId, shopName, imageLink, longitude, latitude } = shop
+                        shopsData.push({ shopId: shopId, shopName: shopName, imageLink: imageLink, longitude: longitude, latitude: latitude })
+                    })
+                } else {
+                    console.log("No shops to display!")
                 }
             }).then(() => {
-                try {
-                    // shopsData.sort(sortShops)
-                    res.redirect('/nearbyShops');
-                    next()
-                } catch (error) {
-                    next(error)
-                }
+                res.redirect('/nearbyShops');
+                next()
             });
     } catch (error) {
         next(error)
     }
 });
 
+//SORTS THE SHOPSDATA ARRAY AND RENDERS THE NEARBYSHOPS PAGE
 router.get('/nearbyShops', (req, res) => {
-    getMyCurrentLocation()
-    shopsData.sort(sortShops)
+    locationFunctions.getMyCurrentLocation()
+    shopsData.sort(locationFunctions.sortShops)
 
     res.render('nearbyShops', { shopsData: shopsData });
 });
 
-router.get('/preferredShops', (req, res) => {
-    likedShopsData = []
+//GETS THE AUTHENTICATED USER'S LIKED SHOPS AND RENDERS THE PREFERRED SHOPS 
+router.get('/preferredShops', (req, res, next) => {
     try {
-        Shops.find({                                                   //Find all except liked and disliked shops
+        likedShopsData = []
+        Shops.find({
             $or:
                 [
-                    { title: { $in: userData[0].likedShopsId } }
+                    { shopId: { $in: userData[0].likedShopsId } }
                 ]
         }).exec()
             .then(allShops => {
-                try {
-                    if (allShops.length >= 1) {                        //If we have shops in the region
-                        allShops.forEach(shop => {
-                            let { title, imageLink, longitude, latitude } = shop;
-                            likedShopsData.push({ title: title, imageLink: imageLink, longitude: longitude, latitude: latitude });
-                        })
-                    } else {
-                        console.log("No shops to display!")
-                    }
-                } catch (err) {
-                    next(err)
+                if (allShops.length >= 1) {
+                    allShops.forEach(shop => {
+                        let { shopId, shopName, imageLink, longitude, latitude } = shop;
+                        likedShopsData.push({
+                            shopId: shopId,
+                            shopName: shopName,
+                            imageLink: imageLink,
+                            longitude: longitude,
+                            latitude: latitude
+                        });
+                    })
+                } else {
+                    console.log("No shops to display!")
                 }
             }).then(() => {
-                try {
-                    getMyCurrentLocation()
-                    likedShopsData.sort(sortShops)
-
-                    res.render('preferredShops', { likedShopsData: likedShopsData });
-                    //next()
-                } catch (error) {
-                    console.log(error)
-                }
+                locationFunctions.getMyCurrentLocation()
+                likedShopsData.sort(locationFunctions.sortShops)
+                res.render('preferredShops', { likedShopsData: likedShopsData });
             });
     } catch (error) {
         next(error)
     }
 });
 
+//REMOVES A SHOP FROM THE CURRENT USER'S LIKEDSHOPSID ARRAY
 router.post('/removeFromPreferredShops', (req, res, next) => {
-
-    userData[0].likedShopsId = userData[0].likedShopsId.filter(likedShopsId => likedShopsId !== req.body.title)
-    
-    console.log(userData[0].likedShopsId)
-
+    userData[0].likedShopsId = userData[0].likedShopsId.filter(likedShopsId => likedShopsId !== req.body.shopId)
     Users.findOneAndUpdate({ _id: userData[0]._id },
         {
             likedShopsId: userData[0].likedShopsId
@@ -174,9 +99,10 @@ router.post('/removeFromPreferredShops', (req, res, next) => {
         });
 })
 
+//ADDS SHOP TO CURRENT USER'S LIKEDSHOPSID ARRAY
 router.post('/likeShop', (req, res, next) => {
-    userData[0].likedShopsId.push(req.body.title)
-
+    userData[0].likedShopsId.push(req.body.shopId)
+    
     Users.findOneAndUpdate({ _id: userData[0]._id },
         {
             likedShopsId: userData[0].likedShopsId
@@ -184,7 +110,7 @@ router.post('/likeShop', (req, res, next) => {
     ).exec()
         .then(() => {
             try {
-                res.redirect('/nearbyFilteredShops')
+                res.redirect('/filterNearbyShops')
                 next()
             } catch (error) {
                 next(error)
@@ -192,16 +118,14 @@ router.post('/likeShop', (req, res, next) => {
         });
 })
 
+//ADDS SHOP TO CURRENT USER'S DISLIKEDSHOPSID ARRAY AND THEN REMOVES IT AFTER 10 SECONDS
 router.post('/disLikeShop', (req, res, next) => {
+    userData[0].dislikedShopsId.push(req.body.shopId)
 
-    userData[0].dislikedShopsId.push(req.body.title)
     setTimeout(function putBackData() {
-
-        //put it back to shops data
         shopsData.push(dislikedShopsArray[0])
         dislikedShopsArray.splice(0, 1)
-
-        userData[0].dislikedShopsId = userData[0].dislikedShopsId.filter(dislikedShopsId => dislikedShopsId !== req.body.title)
+        userData[0].dislikedShopsId = userData[0].dislikedShopsId.filter(dislikedShopsId => dislikedShopsId !== req.body.shopId)
         Users.findOneAndUpdate({ _id: userData[0]._id },
             {
                 dislikedShopsId: userData[0].dislikedShopsId
@@ -209,9 +133,7 @@ router.post('/disLikeShop', (req, res, next) => {
             .exec();
     }, 10000);
 
-    //Add this shop to the disliked shops array then 
-    dislikedShopsArray.push(shopsData.filter(shopsData => shopsData.title === req.body.title)[0])
-
+    dislikedShopsArray.push(shopsData.filter(shopsData => shopsData.shopId === req.body.shopId)[0])
     Users.findOneAndUpdate({ _id: userData[0]._id },
         {
             dislikedShopsId: userData[0].dislikedShopsId
@@ -219,7 +141,7 @@ router.post('/disLikeShop', (req, res, next) => {
         .exec()
         .then(() => {
             try {
-                res.redirect('/nearbyFilteredShops')
+                res.redirect('/filterNearbyShops')
                 next()
             } catch (error) {
                 next(error)
@@ -228,5 +150,3 @@ router.post('/disLikeShop', (req, res, next) => {
 })
 
 module.exports = router;
-
-
